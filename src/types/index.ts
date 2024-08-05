@@ -51,3 +51,42 @@ export interface ProductData {
   qty: string;
   subtotal: number;
 }
+
+export interface CustomerReq {
+  id: string;
+  nama: string;
+  alamat: string;
+  phone: string;
+}
+
+export interface CustomerResp {
+  id: string;
+  nama: string;
+  alamat: string;
+  phone: string;
+}
+
+export interface ProductApi {
+  id: string;
+  id_transaksi: string;
+  kd_barang: string;
+  nama_barang: string;
+  qty: number;
+  subtotal: number;
+}
+
+export interface TransactionResp {
+  id: string;
+  id_customer: string;
+  nomor_transaksi: string;
+  tanggal_transaksi: string;
+  total_transaksi: string;
+}
+
+export interface TransactionReq {
+  id: string;
+  id_customer: string;
+  nomor_transaksi: string;
+  tanggal_transaksi: string;
+  total_transaksi: string;
+}
