@@ -7,6 +7,8 @@ import {
   Input,
   Button,
   Table,
+  MainWrap,
+  Navbar,
 } from "../../components";
 import { ProductData } from "../../types";
 import {
@@ -15,6 +17,11 @@ import {
   formatNumber,
 } from "../../helper";
 import { addTransactionColumns } from "../../data";
+import { toast } from "react-toastify";
+import { useGetProductsMutation } from "../../redux/api/productApi";
+import { useGetCustomersMutation } from "../../redux/api/customerApi";
+import { ProductResp, CustomerResp, CustomerApi } from "../../types";
+import { productPrice } from "../../data";
 
 const AddTransaction = () => {
   const [data, setData] = useState<ProductData[]>([]);
@@ -27,27 +34,65 @@ const AddTransaction = () => {
   const [customerAddress, setCustomerAddress] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [productQty, setProductQty] = useState("");
-  const [productSubtotal, setProductSubtotal] = useState("0"); // Change to string
+  const [productSubtotal, setProductSubtotal] = useState("0");
   const [transactionDate, setTransactionDate] = useState("");
-  const [transactionNumber, setTransactionNumber] = useState(1); // Start with 1
+  const [transactionNumber, setTransactionNumber] = useState(1);
 
-  // Options for customers and products
-  const customerOptions = [
-    { value: "customer1", label: "Customer 1" },
-    { value: "customer2", label: "Customer 2" },
-    { value: "customer3", label: "Customer 3" },
-  ];
+  // get customer
+  const [getCustomer, { data: customer }] = useGetCustomersMutation();
+  const [customerOption, setCustomerOption] = useState<CustomerResp[]>([]);
 
-  const productOptions = [
-    { value: "product1", label: "Product 1", id: 1, price: 100 },
-    { value: "product2", label: "Product 2", id: 2, price: 200 },
-    { value: "product3", label: "Product 3", id: 3, price: 300 },
-  ];
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        await getCustomer().unwrap();
+      } catch (err) {
+        console.error("Failed to fetch customers:", err);
+      }
+    };
 
-  // Calculate subtotal whenever selectedProduct or productQty changes
+    fetchCustomers();
+  }, [getCustomer]);
+
+  useEffect(() => {
+    if (customer && customer.metadata.status === 200) {
+      setCustomerOption(customer.response);
+    } else if (customer && customer.metadata.status != 200) {
+      console.error("Error fetching customers:", customer.metadata.message);
+    }
+  }, [customer]);
+
+  // get product
+  const [getProduct, { data: product, isLoading }] = useGetProductsMutation();
+  const [productOptions, setProductOptions] = useState<ProductResp[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        await getProduct().unwrap();
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      }
+    };
+
+    fetchProducts();
+  }, [getProduct]);
+
+  useEffect(() => {
+    if (product && product.metadata.status === 200) {
+      const productsWithPrice = product.response.map((p, index) => ({
+        ...p,
+        price: productPrice[index % productPrice.length],
+      }));
+      setProductOptions(productsWithPrice);
+    } else if (product && product.metadata.status !== 200) {
+      console.error("Error fetching products:", product.metadata.message);
+    }
+  }, [product]);
+
   useEffect(() => {
     const selectedProductData = productOptions.find(
-      (product) => product.value === selectedProduct
+      (product) => product.kd_barang === selectedProduct
     );
 
     if (selectedProductData && productQty) {
@@ -55,7 +100,7 @@ const AddTransaction = () => {
         selectedProductData.price,
         Number(productQty)
       );
-      setProductSubtotal(formatNumber(subtotal)); // Convert subtotal to formatted string
+      setProductSubtotal(formatNumber(subtotal));
     } else {
       setProductSubtotal("0");
     }
@@ -66,18 +111,18 @@ const AddTransaction = () => {
   };
 
   const formatters = {
-    subtotal: formatNumber, // Gunakan fungsi formatRp untuk kolom subtotal
+    subtotal: formatNumber,
   };
 
   const handleAddProduct = () => {
-    const selectedProductData = productOptions.find(
-      (product) => product.value === selectedProduct
+    const selectedProductData = productOptions?.find(
+      (product: any) => product.kd_barang === selectedProduct
     );
 
     if (selectedProductData) {
       const newProduct = {
         number: data.length + 1,
-        name: selectedProductData.label,
+        name: selectedProductData.nama_barang,
         qty: productQty,
         subtotal: selectedProductData.price * Number(productQty),
       };
@@ -86,16 +131,16 @@ const AddTransaction = () => {
       setTotalPrice(newData.reduce((total, item) => total + item.subtotal, 0));
       setSelectedProduct("");
       setProductQty("");
-      setProductSubtotal("0"); // Reset to string
+      setProductSubtotal("0");
     }
   };
 
   const handleDelete = () => {
-    alert("deleted");
+    toast.success("Hapus berhasil?");
   };
 
   const handleEdit = () => {
-    alert("update");
+    toast.success("Edit berhasil?");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -108,7 +153,7 @@ const AddTransaction = () => {
       !customerAddress ||
       !customerPhone
     ) {
-      alert("Jangan ada yang kosong ygy");
+      toast.info("Jangan ada yang kosong ygy");
       return;
     }
 
@@ -121,12 +166,16 @@ const AddTransaction = () => {
       customerPhone,
       products: data,
     };
+    toast.success("Berhasil cek console");
     console.log(transactionData);
     setTransactionNumber((prev) => prev + 1);
   };
 
   return (
-    <div className="max-w-7xl mx-auto bg-gray-100 p-8">
+    <MainWrap style="h-screen">
+      <Navbar />
+      <div className="bg-slate-300 h-1 my-4">&nbsp;</div>
+
       <form onSubmit={handleSubmit}>
         <LargeText
           text={"FORM TRANSAKSI"}
@@ -145,7 +194,10 @@ const AddTransaction = () => {
         <div>
           <MediumText text={"Pilih Customer"} className="text-sm" />
           <Option
-            options={customerOptions}
+            options={customerOption.map((c) => ({
+              value: c.id,
+              label: c.nama,
+            }))}
             selectedValue={selectedCustomer}
             isCustomerOption={true}
             onChange={(value) => setSelectedCustomer(value)}
@@ -178,11 +230,19 @@ const AddTransaction = () => {
         <div>
           <MediumText text={"Pilih Barang"} className="text-sm" />
           <div className="flex gap-4">
-            <Option
-              options={productOptions}
-              selectedValue={selectedProduct}
-              onChange={(value) => setSelectedProduct(value)}
-            />
+            {isLoading ? (
+              <p>Loading</p>
+            ) : (
+              <Option
+                options={productOptions.map((p) => ({
+                  value: p.kd_barang,
+                  label: p.nama_barang,
+                  price: p.price,
+                }))}
+                selectedValue={selectedProduct}
+                onChange={(value) => setSelectedProduct(value)}
+              />
+            )}
             <Input
               placeholder="Qty"
               value={productQty}
@@ -219,7 +279,7 @@ const AddTransaction = () => {
 
         <Button text="Simpan Transaksi" type="submit" />
       </form>
-    </div>
+    </MainWrap>
   );
 };
 

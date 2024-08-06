@@ -1,3 +1,5 @@
+import { UserResp } from "../types";
+
 export const formatToRupiah = (amount: number): string => {
   const numberString = amount.toString().replace(/,/g, "");
 
@@ -21,11 +23,28 @@ export const formatNumber = (value: number): string => {
   return value.toLocaleString("id-ID"); // Format angka dengan pemisah ribuan
 };
 
-export const generateTransactionNumber = (transactionNumber: number) => {
+export const generateTransactionNumber = (
+  transactionNumber: number,
+  prefix: string = "S0"
+) => {
   const now = new Date();
-  const yearMonth = `${now.getFullYear()}-${("0" + (now.getMonth() + 1)).slice(
-    -2
-  )}`;
+  const year = now.getFullYear();
+  const month = ("0" + (now.getMonth() + 1)).slice(-2);
   const formattedNumber = ("0000" + transactionNumber).slice(-4);
-  return `S0/${yearMonth}/${formattedNumber}`;
+
+  return `${prefix}/${year}-${month}/${formattedNumber}`;
+};
+
+export const addUserToLocalStorage = (user: UserResp) => {
+  localStorage.setItem("user", JSON.stringify(user.response));
+};
+
+export const removeUserFromLocalStorage = () => {
+  localStorage.removeItem("user");
+};
+
+export const getUserFromLocalStorage = () => {
+  const result = localStorage.getItem("user");
+  const user = result ? JSON.parse(result) : null;
+  return user;
 };

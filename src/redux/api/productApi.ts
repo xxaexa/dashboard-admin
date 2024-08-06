@@ -7,27 +7,15 @@ export const productApi = createApi({
   baseQuery: customFetchBase,
   tagTypes: ["Product"],
   endpoints: (builder) => ({
-    getTransaction: builder.query<ProductApi, string | undefined>({
-      query(id) {
-        return {
-          url: `/products/${id}`,
-        };
-      },
-      providesTags: ["Product"],
-      transformResponse: (response: ProductApi) => response,
-    }),
-
-    getTransactions: builder.query<ProductApi[], void>({
+    getProducts: builder.mutation<ProductApi, void>({
       query() {
         return {
-          url: `/products/`,
+          url: "main/list_barang",
+          method: "POST",
         };
       },
-      providesTags: [{ type: "Product", id: "LIST" }],
-      transformResponse: (response: { products: ProductApi[] }) =>
-        response.products,
     }),
   }),
 });
 
-export const { useGetTransactionQuery, useGetTransactionsQuery } = productApi;
+export const { useGetProductsMutation } = productApi;

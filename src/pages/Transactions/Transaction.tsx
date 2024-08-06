@@ -6,40 +6,68 @@ import {
   Input,
   DatePicker,
   Table,
+  Navbar,
+  MainWrap,
 } from "../../components";
 import AddIcon from "./../../assets/add.svg";
 import FilterIcon from "./../../assets/filter.svg";
 import ExcelIcon from "./../../assets/excel-file.svg";
-import { transactionData, transactioncolumns } from "../../data";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { useGetCustomersMutation } from "../../redux/api/customerApi";
+import { CustomerResp } from "../../types";
+import { transactioncolumns } from "../../data";
 import { formatNumber } from "../../helper";
 
 const Transaction = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [customerOption, setCustomerOption] = useState<CustomerResp[]>([]);
 
   const handleFilter = () => {
     console.log(startDate, endDate);
   };
 
   const formatters = {
-    total: formatNumber, // Gunakan fungsi formatRp untuk kolom total
+    phone: formatNumber, // Misalnya, gunakan fungsi formatNumber untuk kolom telepon
   };
 
   const handleDelete = () => {
-    alert("deleted");
+    toast.success("delete?");
   };
 
   const handleEdit = () => {
-    alert("update");
+    toast.success("update?");
   };
 
+  // Fetch customer data
+  const [getCustomer, { data: customer }] = useGetCustomersMutation();
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        await getCustomer().unwrap();
+      } catch (err) {
+        console.error("Failed to fetch customers:", err);
+      }
+    };
+
+    fetchCustomers();
+  }, [getCustomer]);
+
+  useEffect(() => {
+    if (customer && customer.metadata.status === 200) {
+      console.log(customer.response);
+      setCustomerOption(customer.response);
+    } else if (customer && customer.metadata.status != 200) {
+      console.error("Error fetching customers:", customer.metadata.message);
+    }
+  }, [customer]);
+
   return (
-    <div className="max-w-7xl mx-auto bg-gray-100">
-      <LargeText
-        text={"TRANSAKSI PENJUALAN"}
-        className="text-xl font-bold mt-6"
-      />
+    <MainWrap style="h-screen">
+      <Navbar />
+      <LargeText text={"DATA CUSTOMER"} className="text-xl font-bold mt-6" />
 
       {/* filter */}
       <MediumText
@@ -58,7 +86,7 @@ const Transaction = () => {
 
         <div>
           <Link to={"add"}>
-            <Button icon={<AddIcon />} text="Tambah Transaksi" />
+            <Button icon={<AddIcon />} text="Tambah Customer" />
           </Link>
         </div>
       </div>
@@ -73,13 +101,13 @@ const Transaction = () => {
       <div className="mt-3">
         <Table
           columns={transactioncolumns}
-          data={transactionData}
+          data={customerOption}
           onDelete={handleDelete}
           onEdit={handleEdit}
           formatters={formatters}
         />
       </div>
-    </div>
+    </MainWrap>
   );
 };
 

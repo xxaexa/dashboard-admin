@@ -37,7 +37,7 @@ const Option = ({
         ))}
 
         {isCustomerOption && (
-          <option value="add-customer">Add New Customer</option>
+          <option value="add-customer">Tambah Customer Baru</option>
         )}
       </select>
 

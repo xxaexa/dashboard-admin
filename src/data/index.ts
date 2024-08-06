@@ -1,10 +1,10 @@
 import { Column } from "../types";
 
 export const transactioncolumns: Column[] = [
-  { header: "No", accessor: "number" },
-  { header: "Nomor Transaksi", accessor: "tranNumber" },
-  { header: "Customer", accessor: "customer" },
-  { header: "Total", accessor: "total" },
+  { header: "No", accessor: "nip" },
+  { header: "Nomor Transaksi", accessor: "nip" },
+  { header: "Customer", accessor: "nama" },
+  { header: "Total", accessor: "alamat" },
 ];
 
 export const transactionData = [
@@ -30,3 +30,5 @@ export const addTransactionColumns: Column[] = [
   { header: "Qty", accessor: "qty" },
   { header: "Subtotal", accessor: "subtotal" },
 ];
+
+export const productPrice = [10000, 20000, 30000];

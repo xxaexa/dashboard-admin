@@ -1,17 +1,33 @@
-import { BrowserRouter , Routes, Route } from 'react-router-dom';
-import Transaction from "./pages/Transactions/Transaction"
-import AddTransaction from './pages/Transactions/AddTransaction';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Transaction, AddTransaction, Login, Register } from "./pages";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-      <Route path="/" element={<Transaction />} />
-      <Route path="/add" element={<AddTransaction />} />
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Transaction />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add"
+          element={
+            <ProtectedRoute>
+              <AddTransaction />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
-   
-  )
+  );
 }
 
-export default App
+export default App;

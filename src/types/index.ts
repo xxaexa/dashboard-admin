@@ -1,3 +1,5 @@
+// component
+
 export interface TextProps {
   text: string | number;
   className?: string;
@@ -52,6 +54,35 @@ export interface ProductData {
   subtotal: number;
 }
 
+export interface InputUsernameProps {
+  id: string;
+  style?: string;
+  name: string;
+  type: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export interface InputPasswordProps {
+  id: string;
+  name: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export interface MainWrapProps {
+  children: React.ReactNode;
+  style?: string;
+}
+
+// redux
+interface Metadata {
+  status: number;
+  message: string;
+}
+
 export interface CustomerReq {
   id: string;
   nama: string;
@@ -66,13 +97,20 @@ export interface CustomerResp {
   phone: string;
 }
 
-export interface ProductApi {
-  id: string;
-  id_transaksi: string;
+export interface CustomerApi {
+  response: CustomerResp[];
+  metadata: Metadata;
+}
+
+export interface ProductResp {
   kd_barang: string;
   nama_barang: string;
-  qty: number;
-  subtotal: number;
+  price: number;
+}
+
+export interface ProductApi {
+  response: ProductResp[];
+  metadata: Metadata;
 }
 
 export interface TransactionResp {
@@ -89,4 +127,24 @@ export interface TransactionReq {
   nomor_transaksi: string;
   tanggal_transaksi: string;
   total_transaksi: string;
+}
+
+interface AuthResponse {
+  uid: string;
+  token: string;
+}
+
+export interface UserResp {
+  response: AuthResponse;
+  metadata: Metadata;
+}
+
+export interface GenericResponse {
+  response: AuthResponse;
+  metadata: Metadata;
+}
+
+export interface UserReq {
+  username: string;
+  password: string;
 }
